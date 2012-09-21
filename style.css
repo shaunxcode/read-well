@@ -1,0 +1,37 @@
+ body {
+    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+    color: #252519;
+    font-size: 15px;
+    line-height: 22px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+input {
+    padding-left: 25px;
+    width: 100%; 
+    border: 0;
+    font-family: Monaco, Consolas, "Lucida Console", monospace;
+    font-size: 12px;
+    line-height: 18px;
+    background: inherit;
+}
+
+td { 
+    vertical-align: top;
+}
+
+td.code {
+    background: #F5F5FF;
+    border-left: 1px solid #E5E5EE;
+}
+
+td.margin { 
+    padding-left: 20px;
+    width: 410px;
+    padding-right: 20px;
+}
