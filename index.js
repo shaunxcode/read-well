@@ -2,15 +2,23 @@
 (function() {
 
   $(function() {
-    var activeLine, addLine, editCell, editor, marginCell;
+    var activeLine, addLine, editCell, editor, marginCell, newLine, title;
     editor = $("<table />").appendTo("body");
     activeLine = false;
     editCell = function(line) {
-      var cell, input;
+      var cell, input, remove;
       cell = $("<td />").addClass('code').append(input = $("<input />"));
+      cell.input = input;
       cell.on('click', function() {
         return cell.focus();
       });
+      cell.val = function(v) {
+        if (v) {
+          return input.val(v);
+        } else {
+          return input.val();
+        }
+      };
       cell.focus = function() {
         input.focus();
         return activeLine = line;
@@ -20,9 +28,14 @@
           return e.preventDefault();
         }
       });
+      remove = false;
       input.on('keyup', function(e) {
+        var chars, curSpace, oldNext, remainingChars, start, val;
         if (e.keyCode === 9) {
-          console.log("tab");
+          start = input.get(0).selectionStart;
+          chars = input.val();
+          input.val(chars.substring(0, start) + "\t" + chars.substring(start, chars.length));
+          input.get(0).setSelectionRange(start + 1, start + 1);
         }
         if (e.keyCode === 38 && line.prior) {
           line.prior.code.focus();
@@ -30,21 +43,71 @@
         if (e.keyCode === 40 && line.next) {
           line.next.code.focus();
         }
-        if (e.keyCode === 8 && input.val().replace(/\s+/, '').length === 0 && line.prior) {
-          line.container.remove();
-          line.prior.code.focus();
+        if (e.keyCode === 8 && input.get(0).selectionStart === 0 && line.prior) {
+          if (remove || input.val().length) {
+            line.prior.next = line.next;
+            line.next.prior = line.prior;
+            val = input.val();
+            if (val.replace(/\s+/, '').length) {
+              line.prior.code.val(line.prior.code.val() + val);
+            }
+            line.container.remove();
+            line.prior.code.focus();
+          } else {
+            remove = true;
+            return;
+          }
         }
         if (e.keyCode === 13) {
-          return line.next = addLine().code.focus();
+          oldNext = line.next;
+          oldNext.prior = line.next = addLine();
+          line.next.next = oldNext;
+          remainingChars = input.val().substring(input.get(0).selectionStart, input.val().length);
+          if (remainingChars.length) {
+            line.next.code.val(remainingChars);
+            input.val(input.val().substring(0, input.get(0).selectionStart));
+            line.next.code.input.focus();
+            line.next.code.input.get(0).setSelectionRange(0, 0);
+          } else {
+            curSpace = input.val().match(/^\s+/);
+            if (curSpace != null ? curSpace.length : void 0) {
+              line.next.code.val(curSpace[0]);
+            }
+            line.next.code.focus();
+          }
         }
+        return remove = false;
       });
       return cell;
     };
-    marginCell = function() {
-      return $("<td />").addClass("margin").attr({
-        width: "100",
+    marginCell = function(line) {
+      var cell;
+      cell = $("<td />").addClass("margin").attr({
         contentEditable: true
       });
+      cell.on('keyup', function(e) {
+        var at_end, at_start, next_text, post_range, pre_range, range, this_text;
+        range = window.getSelection().getRangeAt(0);
+        pre_range = document.createRange();
+        pre_range.selectNodeContents(this);
+        pre_range.setEnd(range.startContainer, range.startOffset);
+        this_text = pre_range.cloneContents();
+        at_start = this_text.textContent.length === 0;
+        post_range = document.createRange();
+        post_range.selectNodeContents(this);
+        post_range.setStart(range.endContainer, range.endOffset);
+        next_text = post_range.cloneContents();
+        at_end = next_text.textContent.length === 0;
+        if (e.keyCode === 38 && at_start && line.prior) {
+          line.prior.comment.focus();
+          activeLine = line.prior;
+        }
+        if (e.keyCode === 40 && at_end && line.next) {
+          line.next.comment.focus();
+          return activeLine = line.next;
+        }
+      });
+      return cell;
     };
     addLine = function() {
       var line;
@@ -52,7 +115,7 @@
         prior: activeLine,
         next: false
       };
-      line.container = $("<tr />").append(line.comment = marginCell(), line.code = editCell(line));
+      line.container = $("<tr />").append(line.comment = marginCell(line), line.code = editCell(line));
       if (activeLine) {
         activeLine.container.after(line.container);
       } else {
@@ -60,7 +123,13 @@
       }
       return line;
     };
-    return addLine().code.focus();
+    title = addLine();
+    title.code.input.remove();
+    title.comment.html("<h1>YourFileName.here</h1>Some sort of description");
+    activeLine = title;
+    newLine = addLine();
+    title.next = newLine;
+    return newLine.code.focus();
   });
 
 }).call(this);
