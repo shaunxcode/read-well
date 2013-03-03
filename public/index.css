@@ -1,0 +1,46 @@
+.hallotoolbar {
+  z-index: 999;
+}
+body {
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+  color: #252519;
+}
+#comments {
+  float: left;
+  width: 210px;
+  height: 300px;
+  overflow: auto;
+}
+#comments .comment {
+  padding-left: 30px;
+  padding-right: 20px;
+  min-height: 1em;
+}
+#comments .comment h1 {
+  font-size: 2em;
+}
+#comments .comment h2 {
+  font-size: 1.75em;
+}
+#comments .comment h3 {
+  font-size: 1.5em;
+}
+#comments .comment h4 {
+  font-size: 1.25em;
+}
+#comments .comment.top {
+  min-height: 0;
+  height: 0;
+  border-color: #fff;
+}
+.CodeMirror {
+  background: #F5F5FF;
+  line-height: 1.65em;
+}
+.CodeMirror-linenumber {
+  cursor: pointer;
+}
+#code {
+  float: left;
+  height: 100%;
+}
